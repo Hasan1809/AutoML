@@ -1,0 +1,18 @@
+
+
+
+ARTIFACT_DIR = "artifacts"
+
+
+
+DATA_INGESTION_DIR = "data_ingestion"
+DATA_INGESTION_FEATURE_STORE_DIR = "feature_store"
+DATA_INGESTION_INGESTED_DIR = "ingested"
+DATA_INGESTION_TRAIN_TEST_SPLIT_RATIO = 0.2
+TRAIN_FILE_NAME = "train.csv"
+TEST_FILE_NAME = "test.csv"
+DATA_INGESTION_FEATURE_STORE_FILE_NAME = "full_data.csv"
+
+
+DATA_VALIDATION_DIR = "data_validation"
+MISSING_THRESHOLD = 0.2
