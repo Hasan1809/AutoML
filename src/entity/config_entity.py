@@ -30,5 +30,7 @@ class DataIngestionConfig:
 class DataValidationConfig:
     def __init__(self, pipeline_config:PipelineConfig):
         self.data_validation_dir = os.path.join(pipeline_config.artifact_dir, DATA_VALIDATION_DIR)
-        self.report_file_path = os.path.join(self.data_validation_dir, "report.yaml")
+        self.report_file_path = os.path.join(self.data_validation_dir, REPORT_FILE_NAME)
         self.missing_threshold:float = MISSING_THRESHOLD
+        self.one_hot_threshold = ONE_HOT_THRESHOLD
+        self.max_file_size = MAX_FILE_SIZE
