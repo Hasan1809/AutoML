@@ -34,3 +34,11 @@ class DataValidationConfig:
         self.missing_threshold:float = MISSING_THRESHOLD
         self.one_hot_threshold = ONE_HOT_THRESHOLD
         self.max_file_size = MAX_FILE_SIZE
+
+
+class DataTransformationConfig:
+    def __init__(self, pipeline_config: PipelineConfig):
+        self.data_transformation_dir = os.path.join(pipeline_config.artifact_dir, DATA_TRANSFORMATION_DIR)
+        self.preprocessing_obj = os.path.join(self.data_transformation_dir, PREPROCESSING_PATH , PREPROCESSING_OBJ_FILE_NAME)
+        self.transformed_train = os.path.join(self.data_transformation_dir, TRANSFORMED_PATH , TRANSFORMED_TRAIN_FILE_NAME)
+        self.transformed_test = os.path.join(self.data_transformation_dir, TRANSFORMED_PATH, TRANSFORMED_TEST_FILE_NAME)

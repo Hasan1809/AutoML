@@ -11,3 +11,7 @@ def save_object(file_path:str , obj):
             json.dump(obj, file_obj, indent=4, sort_keys=True)
     except Exception as e:
         raise AutoMLException(e, sys)
+
+def load_object(file_path: str):
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)

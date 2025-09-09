@@ -19,3 +19,11 @@ MISSING_THRESHOLD = 0.2
 MAX_FILE_SIZE = 1 #MB
 ONE_HOT_THRESHOLD = 4
 REPORT_FILE_NAME = "report.json"
+
+
+DATA_TRANSFORMATION_DIR = "data_transformation"
+PREPROCESSING_PATH = "preprocessing_object"
+PREPROCESSING_OBJ_FILE_NAME = "preprocessor.pkl"
+TRANSFORMED_PATH = "transformed"
+TRANSFORMED_TRAIN_FILE_NAME = "train.csv"
+TRANSFORMED_TEST_FILE_NAME = "test.csv"

@@ -15,7 +15,7 @@ class DataValidation:
         self.target = target
         self.problem_type = problem_type
         self.report = {
-            "status": "valid",
+            "status": True,
             "dataset_summary": {},
             "target_analysis" : {},
             "column_analysis": {},
@@ -26,13 +26,13 @@ class DataValidation:
         
         size_mb = os.path.getsize(self.data_ingestion_artifact.feature_store_file_path)/(1024 * 1024)
         if size_mb > self.data_validation_config.max_file_size:
-            self.report["status"] = "invalid"
-            self.report["problems"].append(f"File size of {size_mb}MB is too large. Maximum is {self.data_validation_config.max_file_size}MB")
+            self.report["status"] = False
+
     
     def check_empty(self, df: pd.DataFrame):
         if df.empty:
-            self.report["status"] = "invalid"
-            self.report["problems"].append("Dataframe is empty")
+            self.report["status"] = False
+
     
     def get_data_summary(self, df: pd.DataFrame):
         self.report["dataset_summary"] =  {
@@ -131,18 +131,25 @@ class DataValidation:
             
             df = pd.read_csv(self.data_ingestion_artifact.feature_store_file_path)
             
+            #making checks on the data
+            self.check_empty(df)
+            logging.info("Checked whether dataframe is empty or not")
+            
             #build report
             self.get_data_summary(df)
+            logging.info("Adding data summary to report")
             self.get_target_analysis(df)
+            logging.info("Adding target summary to report")
             self.get_column_analysis(df)
+            logging.info("Adding column summary to report")
             self.get_actions(df)
-            
-            print(self.report)
-            
+            logging.info("Adding actions to report")
+                        
             save_object( self.data_validation_config.report_file_path , self.report)
+            logging.info(f"Saved report to {self.data_validation_config.report_file_path}")
             
             return DataValidationArtifact(report_file_path=self.data_validation_config.report_file_path,
-                                          status=True)
+                                          status= self.report["status"])
             
         except Exception as e:
             raise AutoMLException(e,sys)
