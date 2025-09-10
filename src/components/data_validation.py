@@ -149,7 +149,9 @@ class DataValidation:
             logging.info(f"Saved report to {self.data_validation_config.report_file_path}")
             
             return DataValidationArtifact(report_file_path=self.data_validation_config.report_file_path,
-                                          status= self.report["status"])
+                                          status= self.report["status"],
+                                          train_file_path=self.data_ingestion_artifact.train_file_path,
+                                          test_file_path=self.data_ingestion_artifact.test_file_path)
             
         except Exception as e:
             raise AutoMLException(e,sys)

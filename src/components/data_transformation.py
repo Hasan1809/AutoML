@@ -2,6 +2,7 @@ from src.entity.artifact_entity import DataValidationArtifact , DataTransformati
 from src.entity.config_entity import DataTransformationConfig
 from src.logger import logging
 from src.exception import AutoMLException
+from src.utils import load_object , save_object
 import sys
 
 
@@ -12,6 +13,8 @@ class DataTransformation:
         self.data_transformation_config = data_transformation_config
     
     def initiate_data_transformation(self):
-        logging.info("Starting data transformation")
-        
-        
+        try:
+            logging.info("Starting data transformation")
+            validation_report = load_object(self.data_validation_artifact.report_file_path)
+        except Exception as e:
+            raise AutoMLException(e, sys)
