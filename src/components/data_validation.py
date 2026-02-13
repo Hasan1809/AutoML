@@ -102,9 +102,10 @@ class DataValidation:
             
         one_hot = []
         label_encode = []
+        categorical_like = ("object", "category", "string", "str")
             
         for col, stats in self.report["column_analysis"].items():
-            if stats["dtype"] in ["object", "category"]:
+            if any(t in stats["dtype"] for t in categorical_like):
                 if stats["unique_values"] <= self.data_validation_config.one_hot_threshold:
                     one_hot.append(col)
                 else:

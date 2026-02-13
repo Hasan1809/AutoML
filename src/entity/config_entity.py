@@ -42,3 +42,15 @@ class DataTransformationConfig:
         self.preprocessing_obj = os.path.join(self.data_transformation_dir, PREPROCESSING_PATH , PREPROCESSING_OBJ_FILE_NAME)
         self.transformed_train = os.path.join(self.data_transformation_dir, TRANSFORMED_PATH , TRANSFORMED_TRAIN_FILE_NAME)
         self.transformed_test = os.path.join(self.data_transformation_dir, TRANSFORMED_PATH, TRANSFORMED_TEST_FILE_NAME)
+
+
+class ModelTrainerConfig:
+    def __init__(self, pipeline_config: PipelineConfig):
+        self.model_trainer_dir = os.path.join(pipeline_config.artifact_dir, MODEL_TRAINER_DIR)
+        self.trained_model_file_path = os.path.join(self.model_trainer_dir, TRAINED_MODEL_DIR, MODEL_FILE_NAME)
+        self.metrics_file_path = os.path.join(self.model_trainer_dir, MODEL_REPORT_FILE_NAME)
+        self.model_registry_dir = os.path.join(pipeline_config.artifact_name, MODEL_REGISTRY_DIR)
+        self.latest_dir = os.path.join(self.model_registry_dir, LATEST_MODEL_DIR)
+        self.registry_model_path = os.path.join(self.latest_dir, MODEL_FILE_NAME)
+        self.registry_preprocessor_path = os.path.join(self.latest_dir, PREPROCESSING_OBJ_FILE_NAME)
+        self.registry_report_path = os.path.join(self.latest_dir, MODEL_REPORT_FILE_NAME)
