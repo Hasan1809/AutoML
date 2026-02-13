@@ -94,7 +94,7 @@ class DataValidation:
     
     def get_actions(self, df: pd.DataFrame):
 
-        drop_columns = [col for col, stats in self.report["column_analysis"].items() if stats["missing_pct"] > self.data_validation_config.missing_threshold]
+        drop_columns = [col for col, stats in self.report["column_analysis"].items() if stats["missing_pct"] > self.data_validation_config.missing_threshold and col != self.target]
         impute_columns = [col for col, stats in self.report["column_analysis"].items() 
                             if 0 < stats["missing_pct"] <= self.data_validation_config.missing_threshold]
             

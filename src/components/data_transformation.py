@@ -44,6 +44,7 @@ class DataTransformation:
                 train_df = train_df.drop_duplicates()
                 test_df = test_df.drop_duplicates()
 
+            drop_columns = [c for c in drop_columns if c != target_column]
             for col in drop_columns:
                 if col in train_df.columns:
                     train_df = train_df.drop(columns=col)

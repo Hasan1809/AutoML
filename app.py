@@ -5,7 +5,8 @@ from uuid import uuid4
 from typing import List, Optional, Dict, Any
 
 import pandas as pd
-from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File
+from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from main import run_pipeline, load_settings
@@ -14,6 +15,14 @@ from src.entity.config_entity import PipelineConfig, ModelTrainerConfig
 
 
 app = FastAPI(title="AutoML API", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 jobs: Dict[str, Dict[str, Any]] = {}
 
@@ -62,6 +71,20 @@ def _latest_log_file():
     return latest_path
 
 
+def _latest_validation_report():
+    latest_path = None
+    latest_mtime = 0
+    for root, _, files in os.walk("artifacts"):
+        for f in files:
+            if f == "report.json" and os.path.basename(root) == "data_validation":
+                path = os.path.join(root, f)
+                mtime = os.path.getmtime(path)
+                if mtime > latest_mtime:
+                    latest_mtime = mtime
+                    latest_path = path
+    return latest_path
+
+
 @app.get("/health")
 def health():
     model_path, preproc_path, report_path = _registry_paths()
@@ -87,6 +110,27 @@ def predict(payload: PredictRequest):
     predictor = Predictor(model_path=model_path, preprocessor_path=preproc_path, target=target)
     preds = predictor.predict_dataframe(df)
     return PredictResponse(predictions=[p.item() if hasattr(p, "item") else p for p in preds])
+
+
+@app.post("/predict/upload")
+async def predict_upload(file: UploadFile = File(...)):
+    model_path, preproc_path, _ = _registry_paths()
+    if not (os.path.exists(model_path) and os.path.exists(preproc_path)):
+        raise HTTPException(status_code=404, detail="No registered model/preprocessor found.")
+
+    settings = load_settings(os.path.join("config", "config.yaml"))
+    target = settings.get("target")
+
+    try:
+        import io
+        content = await file.read()
+        df = pd.read_csv(io.StringIO(content.decode("utf-8")))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read uploaded CSV: {e}")
+
+    predictor = Predictor(model_path=model_path, preprocessor_path=preproc_path, target=target)
+    preds = predictor.predict_dataframe(df)
+    return {"predictions": [p.item() if hasattr(p, "item") else p for p in preds]}
 
 
 @app.post("/train", response_model=TrainResponse)
@@ -137,6 +181,14 @@ def get_latest_report():
     return _load_json(report_path)
 
 
+@app.get("/reports/validation/latest")
+def get_latest_validation():
+    path = _latest_validation_report()
+    if not path:
+        raise HTTPException(status_code=404, detail="No validation report found.")
+    return _load_json(path)
+
+
 @app.get("/models/latest")
 def get_latest_model():
     model_path, preproc_path, report_path = _registry_paths()
@@ -163,7 +215,12 @@ def get_latest_logs(lines: int = 200):
 
 
 @app.post("/train/upload")
-async def train_with_upload(background_tasks: BackgroundTasks, file: UploadFile = File(...), target: Optional[str] = None, problem_type: Optional[str] = None):
+async def train_with_upload(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    target: Optional[str] = Form(None),
+    problem_type: Optional[str] = Form(None),
+):
     upload_dir = os.path.join("artifacts", "uploads")
     os.makedirs(upload_dir, exist_ok=True)
     save_path = os.path.join(upload_dir, f"{uuid4()}_{file.filename}")
@@ -173,7 +230,6 @@ async def train_with_upload(background_tasks: BackgroundTasks, file: UploadFile 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save uploaded file: {e}")
 
-    # Run pipeline synchronously for simplicity; could move to background_tasks if desired
     try:
         artifact = run_pipeline(
             override_data_path=save_path,
